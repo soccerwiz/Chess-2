@@ -1,0 +1,15 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Resources\Scripts\CreateBoard.cs">
+    <Files>
+      <File FileName="Assets\Resources\Scripts\CreateBoard.cs" Line="157" Column="12" />
+      <File FileName="Assets\Resources\Scripts\Property_Square.cs" Line="13" Column="10" />
+      <File FileName="Assets\Resources\Scripts\Player.cs" Line="18" Column="55" />
+      <File FileName="Assets\Resources\Scripts\Property_Piece.cs" Line="12" Column="21" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
