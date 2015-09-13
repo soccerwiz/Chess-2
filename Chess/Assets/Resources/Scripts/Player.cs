@@ -141,6 +141,56 @@ public class Player : MonoBehaviour {
 			}
 			break;
 		case "KNIGHT":
+			// All Possible Move Positions
+			for(int i = 0; i < 2; i++){
+				for(int j = 0; j < 2; j++){
+					for(int k = 0; k < 2; k++){
+						for(int l = 0; l < 2; l++){
+							int iRowCheckValue = (k == 0) ? 1 : 2;
+							int iColCheckValue = (l == 0) ? 1 : 2;
+
+							int iRowToCheck = iRow + ((i == 0) ? -iRowCheckValue : iRowCheckValue);
+							int iColToCheck = iColumn + ((j == 0) ? -iColCheckValue : iColCheckValue);
+
+							if(iRowToCheck >= 0 && iRowToCheck < 8 && iColToCheck >= 0 && iColToCheck < 8){
+								//Exists
+								if(ValidMove(brdBoardManager.gobSquares[iRowToCheck, iColToCheck], white, sType)){
+									lstValidSquares.Add (brdBoardManager.gobSquares[iRowToCheck, iColToCheck]);
+								}
+							}
+						}
+					}
+				}
+			}
+			break;
+		case "BISHOP":
+			for(int i = 0; i < 2; i++){
+				for (int j = 0; j < 2; j++){
+					int iCheckRowValue = iRow;
+					int iCheckColValue = iColumn;
+
+					int iIncrementValueRow = (j == 0) ? 1 : 2;
+					int iIncrementValueCol = (j == 0) ? 1 : 2;
+
+					int iIncrementingRow = (i == 0) ? iIncrementValueRow : -iIncrementValueRow;
+					int iIncrementingCol = (i == 0) ? iIncrementValueCol : -iIncrementValueCol;
+
+					bool notValid = false;
+
+					while(iCheckColValue + iIncrementingCol >= 0 && iCheckColValue + iIncrementingCol < 8 && iCheckRowValue + iIncrementingRow >= 0 && iCheckRowValue +iIncrementingRow < 8 && !notValid){
+						iCheckRowValue += iIncrementingRow;
+						iCheckColValue += iIncrementingCol;
+
+						Debug.Log (iCheckRowValue);
+
+						if(ValidMove(brdBoardManager.gobSquares[iCheckRowValue, iCheckColValue], white, sType)){
+							lstValidSquares.Add (brdBoardManager.gobSquares[iCheckRowValue, iCheckColValue]);
+						}else{
+							notValid = true;
+						}
+					}
+				}
+			}
 			break;
 		}
 	}
