@@ -16,11 +16,12 @@ public class CreateBoard : MonoBehaviour {
 	public GameObject gobPrefabKing;
 	public GameObject gobPrefabQueen;
 	public GameObject gobBoard;
+	public GameObject[,] gobSquares;
 
+	private int _iCurrentId;
 	private float fSquareSizeY;
 	private float fSquareSizeX;
 	private float fSquareSizeZ;
-	private GameObject[,] gobSquares;
 
 	// Use this for initialization
 	void Start () {
@@ -62,6 +63,8 @@ public class CreateBoard : MonoBehaviour {
 				}
 
 				prop.SetProperties(white, square, "PAWN");
+				prop.SetPosition((i == 0) ? 1 : iBoardSize - 2, j);
+				gobSquares[(i == 0) ? 1 : iBoardSize - 2, j].GetComponent<Property_Square>().SetPiece(true, white, "PAWN", gob);
 			}
 
 			for(int j = 0; j < 2; j++){
@@ -84,6 +87,8 @@ public class CreateBoard : MonoBehaviour {
 				}
 
 				prop.SetProperties(white, square, "ROOK");
+				prop.SetPosition((i == 0) ? 0 : iBoardSize - 1, (j == 1) ?  0 : iBoardSize - 1);
+				gobSquares[(i == 0) ? 0 : iBoardSize - 1, (j == 1) ?  0 : iBoardSize - 1].GetComponent<Property_Square>().SetPiece(true, white, "ROOK", gob);
 			}
 
 			for(int j = 0; j < 2; j++){
@@ -106,6 +111,8 @@ public class CreateBoard : MonoBehaviour {
 				}
 				
 				prop.SetProperties(white, square, "KNIGHT");
+				prop.SetPosition((i == 0) ? 0 : iBoardSize - 1, (j == 1) ?  1 : iBoardSize - 2);
+				gobSquares[(i == 0) ? 0 : iBoardSize - 1, (j == 1) ?  1 : iBoardSize - 2].GetComponent<Property_Square>().SetPiece(true, white, "KNIGHT", gob);
 			}
 
 			for(int j = 0; j < 2; j++){
@@ -128,6 +135,8 @@ public class CreateBoard : MonoBehaviour {
 				}
 				
 				prop.SetProperties(white, square, "BISHOP");
+				prop.SetPosition((i == 0) ? 0 : iBoardSize - 1, (j == 1) ?  2 : iBoardSize - 3);
+				gobSquares[(i == 0) ? 0 : iBoardSize - 1, (j == 1) ?  2 : iBoardSize - 3].GetComponent<Property_Square>().SetPiece(true, white, "BISHOP", gob);
 			}
 
 			GameObject gobKing = Instantiate(gobPrefabKing);
@@ -149,6 +158,8 @@ public class CreateBoard : MonoBehaviour {
 			}
 			
 			propKing.SetProperties(whiteKing, squareKing, "KING");
+			propKing.SetPosition((i == 0) ? 0 : iBoardSize - 1, iBoardSize -4);
+			gobSquares[(i == 0) ? 0 : iBoardSize - 1, iBoardSize -4].GetComponent<Property_Square>().SetPiece(true, whiteKing, "KING", gobKing);
 
 			GameObject gobQueen = Instantiate(gobPrefabQueen);
 			gobQueen.transform.parent = gobBoard.transform;
@@ -169,6 +180,8 @@ public class CreateBoard : MonoBehaviour {
 			}
 			
 			propQueen.SetProperties(whiteQueen, squareQueen, "QUEEN");
+			propQueen.SetPosition((i == 0) ? 0 : iBoardSize - 1, iBoardSize -5);
+			gobSquares[(i == 0) ? 0 : iBoardSize - 1, iBoardSize -5].GetComponent<Property_Square>().SetPiece(true, whiteQueen, "QUEEN", gobQueen);
 		}
 	}
 
@@ -187,16 +200,18 @@ public class CreateBoard : MonoBehaviour {
 				if(j % 2 == 0 && i % 2 != 0){
 					// White
 					gob.GetComponent<Renderer>().material.color = colSquareWhite;
-					prop.SetProperties(true, i, j);
+					prop.SetProperties(true, i, j, _iCurrentId);
 				}else if(j % 2 != 0 && i % 2 == 0){
 					// White
 					gob.GetComponent<Renderer>().material.color = colSquareWhite;
-					prop.SetProperties(true, i, j);
+					prop.SetProperties(true, i, j, _iCurrentId);
 				}else{
 					// Black
 					gob.GetComponent<Renderer>().material.color = colSquareBlack;
-					prop.SetProperties(false, i, j);
+					prop.SetProperties(false, i, j, _iCurrentId);
 				}
+
+				_iCurrentId++;
 
 				gobSquares[i, j] = gob;
 			}
