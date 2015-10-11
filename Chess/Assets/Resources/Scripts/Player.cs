@@ -83,6 +83,7 @@ public class Player : MonoBehaviour {
 				Debug.Log ("Taking Piece: " + square.name);
 				_gobPieceInHand.transform.parent = gobBoard.transform;
 				_gobPieceInHand.transform.localPosition = new Vector3(square.transform.localPosition.x, 0.0f, square.transform.localPosition.z);
+                _propPiece.gobSquare.GetComponent<Property_Square>().SetPiece(false);
 				_propPiece.gobSquare = propPieceTaking.gobSquare;
 				_propPiece.iCurrentRow = propPieceTaking.iCurrentRow;
 				_propPiece.iCurrentColumn = propPieceTaking.iCurrentColumn;
@@ -105,6 +106,84 @@ public class Player : MonoBehaviour {
 		}
 		return false;
 	}
+
+    public bool ContainsPiece(GameObject square)
+    {
+        Property_Square propSquareCheck = square.GetComponent<Property_Square>() as Property_Square;
+        if (propSquareCheck.bOccupied)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public bool KingCanBeTaken(bool white, int iRow, int iColumn)
+    {
+        Debug.Log("King Move");
+        // N E S W
+        for(int i = 0; i < 4; i++)
+        {
+            int iRowCheck = iRow;
+            int iColumnCheck = iColumn;
+
+            int iIncrementRow = (i == 0 || i == 2) ? ((i == 0) ? 1 : -1) : 0;
+            int iIncrementColumn = (i == 1 || i == 3) ? ((i == 1) ? 1: -1): 0;
+
+            bool notValid = false;
+
+            //Debug.Log(iIncrementRow + " | " + iIncrementColumn);
+
+            while(iRowCheck + iIncrementRow >= 0 && iRowCheck + iIncrementRow < 8 && iColumnCheck + iIncrementColumn >= 0 && iColumnCheck + iIncrementColumn < 8 && !notValid)
+            {
+                iRowCheck += iIncrementRow;
+                iColumnCheck += iIncrementColumn;
+
+                GameObject gobSquareCheck = brdBoardManager.gobSquares[iRowCheck, iColumnCheck];
+                Property_Square propSquareCheck = gobSquareCheck.GetComponent<Property_Square>() as Property_Square;
+                if (propSquareCheck.bOccupied)
+                {
+                    Debug.Log(iRowCheck + " | " + iColumnCheck);
+                    if(propSquareCheck.bOccupiedWhite != white)
+                    {
+                        switch (propSquareCheck.sOccupiedType)
+                        {
+                            case "KING":
+                                int kingPosRow = propSquareCheck.iRow;
+                                int kingPosCol = propSquareCheck.iColumn;
+
+                                if (kingPosCol == iColumnCheck + 1 || kingPosCol == iColumnCheck - 1)
+                                {
+                                    return true;
+                                }
+
+                                if (kingPosRow == iRowCheck + 1 || kingPosRow == iRowCheck - 1)
+                                {
+                                    return true;
+                                }
+
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                else
+                {
+                    notValid = true;
+                }
+            }
+        }
+
+        // NE SE SW NW
+        for(int i = 0; i < 4; i++)
+        {
+
+        }
+        return false;
+    }
 
 	public void PickPiece(GameObject piece){
 		_gobPieceInHand = piece;
@@ -152,8 +231,8 @@ public class Player : MonoBehaviour {
 							int iRowToCheck = iRow + ((i == 0) ? -iRowCheckValue : iRowCheckValue);
 							int iColToCheck = iColumn + ((j == 0) ? -iColCheckValue : iColCheckValue);
 
-							if(iRowToCheck >= 0 && iRowToCheck < 8 && iColToCheck >= 0 && iColToCheck < 8){
-								//Exists
+							if(iRowToCheck >= 0 && iRowToCheck < 8 && iColToCheck >= 0 && iColToCheck < 8 && iRowCheckValue != iColCheckValue){
+                                //Exists
 								if(ValidMove(brdBoardManager.gobSquares[iRowToCheck, iColToCheck], white, sType)){
 									lstValidSquares.Add (brdBoardManager.gobSquares[iRowToCheck, iColToCheck]);
 								}
@@ -169,22 +248,25 @@ public class Player : MonoBehaviour {
 					int iCheckRowValue = iRow;
 					int iCheckColValue = iColumn;
 
-					int iIncrementValueRow = (j == 0) ? 1 : 2;
-					int iIncrementValueCol = (j == 0) ? 1 : 2;
+                    //int iIncrementValueRow = (j == 0) ? 1 : 2;
+                    //int iIncrementValueCol = (j == 0) ? 1 : 2;
 
-					int iIncrementingRow = (i == 0) ? iIncrementValueRow : -iIncrementValueRow;
-					int iIncrementingCol = (i == 0) ? iIncrementValueCol : -iIncrementValueCol;
+                    int iIncrementValueRow = 1;
+                    int iIncrementValueCol = 1;
+
+                    int iIncrementingRow = (i == 0) ? iIncrementValueRow : -iIncrementValueRow;
+					int iIncrementingCol = (j == 0) ? iIncrementValueCol : -iIncrementValueCol;
 
 					bool notValid = false;
+                    bool lastContainedPiece = false;
 
-					while(iCheckColValue + iIncrementingCol >= 0 && iCheckColValue + iIncrementingCol < 8 && iCheckRowValue + iIncrementingRow >= 0 && iCheckRowValue +iIncrementingRow < 8 && !notValid){
+					while(iCheckColValue + iIncrementingCol >= 0 && iCheckColValue + iIncrementingCol < 8 && iCheckRowValue + iIncrementingRow >= 0 && iCheckRowValue +iIncrementingRow < 8 && !notValid && !lastContainedPiece){
 						iCheckRowValue += iIncrementingRow;
 						iCheckColValue += iIncrementingCol;
-
-						Debug.Log (iCheckRowValue);
-
+                        
 						if(ValidMove(brdBoardManager.gobSquares[iCheckRowValue, iCheckColValue], white, sType)){
 							lstValidSquares.Add (brdBoardManager.gobSquares[iCheckRowValue, iCheckColValue]);
+                            lastContainedPiece = ContainsPiece(brdBoardManager.gobSquares[iCheckRowValue, iCheckColValue]);
 						}else{
 							notValid = true;
 						}
@@ -192,6 +274,165 @@ public class Player : MonoBehaviour {
 				}
 			}
 			break;
+        case "ROOK":
+            // Check rows
+            for(int i = 0; i < 2; i++)
+            {
+                int iCheckRowValue = iRow;
+
+                int iIncrementValue = (i == 0) ? 1 : -1;
+
+                bool notValid = false;
+
+                while(iCheckRowValue + iIncrementValue >= 0 && iCheckRowValue + iIncrementValue < 8 && !notValid)
+                {
+                    iCheckRowValue += iIncrementValue;
+
+                    if(ValidMove(brdBoardManager.gobSquares[iCheckRowValue, iColumn], white, sType))
+                    {
+                        lstValidSquares.Add(brdBoardManager.gobSquares[iCheckRowValue, iColumn]);
+                    }
+                    else
+                    {
+                        notValid = true;
+                    }
+                }
+            }
+            // Check columns
+            for(int i = 0; i < 2; i++)
+            {
+                int iCheckColValue = iColumn;
+
+                int iIncrementValue = (i == 0) ? 1 : -1;
+
+                bool notValid = false;
+
+                while(iCheckColValue + iIncrementValue >= 0 && iCheckColValue + iIncrementValue < 8 && !notValid)
+                {
+                    iCheckColValue += iIncrementValue;
+
+                    if(ValidMove(brdBoardManager.gobSquares[iRow, iCheckColValue], white, sType))
+                    {
+                        lstValidSquares.Add(brdBoardManager.gobSquares[iRow, iCheckColValue]);
+                    }
+                    else
+                    {
+                        notValid = true;
+                    }
+                }
+            }
+            break;
+        case "QUEEN":
+            // Check rows
+            for (int i = 0; i < 2; i++)
+            {
+                int iCheckRowValue = iRow;
+
+                int iIncrementValue = (i == 0) ? 1 : -1;
+
+                bool notValid = false;
+
+                while (iCheckRowValue + iIncrementValue >= 0 && iCheckRowValue + iIncrementValue < 8 && !notValid)
+                {
+                    iCheckRowValue += iIncrementValue;
+
+                    if (ValidMove(brdBoardManager.gobSquares[iCheckRowValue, iColumn], white, sType))
+                    {
+                        lstValidSquares.Add(brdBoardManager.gobSquares[iCheckRowValue, iColumn]);
+                    }
+                    else
+                    {
+                        notValid = true;
+                    }
+                }
+            }
+            // Check columns
+            for (int i = 0; i < 2; i++)
+            {
+                int iCheckColValue = iColumn;
+
+                int iIncrementValue = (i == 0) ? 1 : -1;
+
+                bool notValid = false;
+
+                while (iCheckColValue + iIncrementValue >= 0 && iCheckColValue + iIncrementValue < 8 && !notValid)
+                {
+                    iCheckColValue += iIncrementValue;
+
+                    if (ValidMove(brdBoardManager.gobSquares[iRow, iCheckColValue], white, sType))
+                    {
+                        lstValidSquares.Add(brdBoardManager.gobSquares[iRow, iCheckColValue]);
+                    }
+                    else
+                    {
+                        notValid = true;
+                    }
+                }
+            }
+            // Check diagonal
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = 0; j < 2; j++)
+                {
+                    int iCheckRowValue = iRow;
+                    int iCheckColValue = iColumn;
+
+                    //int iIncrementValueRow = (j == 0) ? 1 : 2;
+                    //int iIncrementValueCol = (j == 0) ? 1 : 2;
+
+                    int iIncrementValueRow = 1;
+                    int iIncrementValueCol = 1;
+
+                    int iIncrementingRow = (i == 0) ? iIncrementValueRow : -iIncrementValueRow;
+                    int iIncrementingCol = (j == 0) ? iIncrementValueCol : -iIncrementValueCol;
+
+                    bool notValid = false;
+                    bool lastContainedPiece = false;
+
+                    while (iCheckColValue + iIncrementingCol >= 0 && iCheckColValue + iIncrementingCol < 8 && iCheckRowValue + iIncrementingRow >= 0 && iCheckRowValue + iIncrementingRow < 8 && !notValid && !lastContainedPiece)
+                    {
+                        iCheckRowValue += iIncrementingRow;
+                        iCheckColValue += iIncrementingCol;
+
+                        if (ValidMove(brdBoardManager.gobSquares[iCheckRowValue, iCheckColValue], white, sType))
+                        {
+                            lstValidSquares.Add(brdBoardManager.gobSquares[iCheckRowValue, iCheckColValue]);
+                            lastContainedPiece = ContainsPiece(brdBoardManager.gobSquares[iCheckRowValue, iCheckColValue]);
+                        }
+                        else
+                        {
+                            notValid = true;
+                        }
+                    }
+                }
+            }
+            break;
+        case "KING":
+            // TODO Check if moving into check
+
+            for(int i = 0; i < 2; i++)
+            {
+                for(int j = 0; j < 2; j++)
+                {
+                    int iCheckRowValue = iRow;
+                    int iCheckColumnValue = iColumn;
+
+                    int iIncrementRowValue = (j == 0) ? ((i == 0) ? 1 : -1) : 0;
+                    int iIncrememntColumnValue = (j == 1) ? ((i == 1) ? 1 : -1) : 0;
+
+                    iCheckRowValue += iIncrementRowValue;
+                    iCheckColumnValue += iIncrememntColumnValue;
+
+                    if(iCheckRowValue >= 0 && iCheckRowValue < 8 && iCheckColumnValue >= 0 && iCheckColumnValue < 8)
+                    {
+                        if(ValidMove(brdBoardManager.gobSquares[iCheckRowValue, iCheckColumnValue], white, sType) && !KingCanBeTaken(white, iCheckRowValue, iCheckColumnValue))
+                        {
+                            lstValidSquares.Add(brdBoardManager.gobSquares[iCheckRowValue, iCheckColumnValue]);
+                        }
+                    }
+                }
+            }
+            break;
 		}
 	}
 }
