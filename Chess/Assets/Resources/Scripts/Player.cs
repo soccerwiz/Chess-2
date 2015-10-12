@@ -151,21 +151,24 @@ public class Player : MonoBehaviour {
                         switch (propSquareCheck.sOccupiedType)
                         {
                             case "KING":
+                                Debug.Log("KING FOUND");
+
                                 int kingPosRow = propSquareCheck.iRow;
                                 int kingPosCol = propSquareCheck.iColumn;
 
-                                if (kingPosCol == iColumnCheck + 1 || kingPosCol == iColumnCheck - 1)
+                                if ((kingPosCol == iColumn + 1 || kingPosCol == iColumn - 1) && kingPosRow == iRow)
                                 {
                                     return true;
                                 }
 
-                                if (kingPosRow == iRowCheck + 1 || kingPosRow == iRowCheck - 1)
+                                if ((kingPosRow == iRow + 1 || kingPosRow == iRow - 1) && kingPosCol == iColumn)
                                 {
                                     return true;
                                 }
 
                                 break;
                             default:
+                                return false;
                                 break;
                         }
                     }
@@ -177,6 +180,7 @@ public class Player : MonoBehaviour {
             }
         }
 
+        // TODO Intercardinal directions
         // NE SE SW NW
         for(int i = 0; i < 4; i++)
         {
