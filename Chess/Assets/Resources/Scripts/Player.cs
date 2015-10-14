@@ -107,12 +107,20 @@ public class Player : MonoBehaviour {
 		return false;
 	}
 
-    public bool ContainsPiece(GameObject square)
+	public bool ContainsPiece(GameObject square, string matches = "", bool white = false)
     {
         Property_Square propSquareCheck = square.GetComponent<Property_Square>() as Property_Square;
         if (propSquareCheck.bOccupied)
         {
-            return true;
+			if(matches == ""){
+            	return true;
+			}else{
+				if(propSquareCheck.sOccupiedType == matches && propSquareCheck.bOccupiedWhite != white){
+					return true;
+				}else{
+					return false;
+				}
+			}
         }
         else
         {
@@ -145,7 +153,7 @@ public class Player : MonoBehaviour {
                 Property_Square propSquareCheck = gobSquareCheck.GetComponent<Property_Square>() as Property_Square;
                 if (propSquareCheck.bOccupied)
                 {
-                    Debug.Log(iRowCheck + " | " + iColumnCheck);
+                    //Debug.Log(iRowCheck + " | " + iColumnCheck);
                     if(propSquareCheck.bOccupiedWhite != white)
                     {
                         switch (propSquareCheck.sOccupiedType)
@@ -167,15 +175,25 @@ public class Player : MonoBehaviour {
                                 }
 
                                 break;
-                            default:
-                                return false;
-                                break;
+							case "ROOK":
+							int rookPosRow = propSquareCheck.iRow;
+							int rookPosCol = propSquareCheck.iColumn;
+
+							if(rookPosRow == iRow || rookPosCol == iColumn){
+								return true;
+							}
+								break;
+						case "QUEEN":
+							int queenPosRow = propSquareCheck.iRow;
+							int queenPosCol = propSquareCheck.iColumn;
+
+							if(queenPosRow == iRow || queenPosCol == iColumn){
+								return true;
+							}
+							break;
                         }
                     }
-                }
-                else
-                {
-                    notValid = true;
+					notValid = true;
                 }
             }
         }
@@ -184,8 +202,127 @@ public class Player : MonoBehaviour {
         // NE SE SW NW
         for(int i = 0; i < 4; i++)
         {
+			int iRowCheck = iRow;
+			int iColumnCheck = iColumn;
 
+			int iIncrementRow = (i == 0 || i == 2) ? 1 : -1;
+			int iIncrementColumn = (i == 0 || i == 1) ? 1 : -1;
+
+			bool notValid = false;
+
+			while(iRowCheck + iIncrementRow >= 0 && iRowCheck + iIncrementRow < 8 && iColumnCheck + iIncrementColumn >= 0 && iColumnCheck + iIncrementColumn < 8 && !notValid){
+				iRowCheck += iIncrementRow;
+				iColumnCheck += iIncrementColumn;
+
+				GameObject gobSquareCheck = brdBoardManager.gobSquares[iRowCheck, iColumnCheck];
+				Property_Square propSquareCheck = gobSquareCheck.GetComponent<Property_Square>() as Property_Square;
+
+				if(propSquareCheck.bOccupied){
+					if(propSquareCheck.bOccupiedWhite != white){
+						switch(propSquareCheck.sOccupiedType){
+						case "KING":
+							Debug.Log ("King Found");
+
+							int kingPosRow = propSquareCheck.iRow;
+							int kingPosCol = propSquareCheck.iColumn;
+
+							if(kingPosRow - 1 == iRow && kingPosCol - 1 == iColumn){
+								return true;
+							}else if(kingPosRow - 1 == iRow && kingPosCol + 1 == iColumn){
+								return true;
+							}else if(kingPosRow + 1 == iRow && kingPosCol - 1 == iColumn){
+								return true;
+							}else if(kingPosRow + 1 == iRow && kingPosCol + 1 == iColumn){
+								return true;
+							}
+
+							break;
+						case "QUEEN":
+							int queenPosRow = propSquareCheck.iRow;
+							int queenPosCol = propSquareCheck.iColumn;
+
+							int queenDiffRow = queenPosRow - iRow;
+							int queenDiffCol = queenPosCol - iColumn;
+
+							if(queenDiffRow < 0){
+								queenDiffRow *= -1;
+							}
+
+							if(queenDiffCol < 0){
+								queenDiffCol *= -1;
+							}
+
+							if(queenDiffCol == queenDiffRow){
+								return true;
+							}
+							break;
+						case "PAWN":
+							int pawnPosRow = propSquareCheck.iRow;
+							int pawnPosCol = propSquareCheck.iColumn;
+
+							if(white){
+								if(pawnPosRow - 1 == iRow && pawnPosCol + 1 == iColumn){
+									return true;
+								}else if(pawnPosRow - 1 == iRow && pawnPosCol - 1 == iColumn){
+									return true;
+								}
+							}else{
+								if(pawnPosRow + 1 == iRow && pawnPosCol + 1 == iColumn){
+									return true;
+								}else if(pawnPosRow + 1 == iRow && pawnPosCol - 1 == iColumn){
+									return true;
+								}
+							}
+							break;
+						case "BISHOP":
+							int bishopPosRow = propSquareCheck.iRow;
+							int bishopPosCol = propSquareCheck.iColumn;
+
+							int bishopDiffRow = bishopPosRow - iRow;
+							int bishopDiffCol = bishopPosCol - iColumn;
+							
+							if(bishopDiffRow < 0){
+								bishopDiffRow *= -1;
+							}
+							
+							if(bishopDiffCol < 0){
+								bishopDiffCol *= -1;
+							}
+							
+							if(bishopDiffCol == bishopDiffRow){
+								return true;
+							}
+							break;
+						}
+					}
+					notValid = true;
+				}
+			}
         }
+
+		// Knights
+		// All Possible Move Positions
+		for(int i = 0; i < 2; i++){
+			for(int j = 0; j < 2; j++){
+				for(int k = 0; k < 2; k++){
+					for(int l = 0; l < 2; l++){
+						int iRowCheckValue = (k == 0) ? 1 : 2;
+						int iColCheckValue = (l == 0) ? 1 : 2;
+						
+						int iRowToCheck = iRow + ((i == 0) ? -iRowCheckValue : iRowCheckValue);
+						int iColToCheck = iColumn + ((j == 0) ? -iColCheckValue : iColCheckValue);
+						
+						if(iRowToCheck >= 0 && iRowToCheck < 8 && iColToCheck >= 0 && iColToCheck < 8 && iRowCheckValue != iColCheckValue){
+							//Exists
+							if(ContainsPiece(brdBoardManager.gobSquares[iRowToCheck, iColToCheck], "KNIGHT", white)){
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+
         return false;
     }
 
@@ -414,6 +551,7 @@ public class Player : MonoBehaviour {
         case "KING":
             // TODO Check if moving into check
 
+			// N E S W
             for(int i = 0; i < 2; i++)
             {
                 for(int j = 0; j < 2; j++)
@@ -436,6 +574,28 @@ public class Player : MonoBehaviour {
                     }
                 }
             }
+
+			// NE SE SW NW
+			for(int i = 0; i < 2; i++){
+				for(int j = 0; j < 2; j++){
+					int iCheckRowValue = iRow;
+					int iCheckColumnValue = iColumn;
+
+					int iIncrementRowValue = (j == 0) ? 1 : -1;
+					int iIncrementColumnValue = (i == 0) ? 1 : -1;
+
+					iCheckRowValue += iIncrementRowValue;;
+					iCheckColumnValue += iIncrementColumnValue;
+
+					if(iCheckRowValue >= 0 && iCheckRowValue < 8 && iCheckColumnValue >= 0  && iCheckColumnValue < 8){
+						if(ValidMove(brdBoardManager.gobSquares[iCheckRowValue, iCheckColumnValue], white, sType) && !KingCanBeTaken(white, iCheckRowValue, iCheckColumnValue))
+						{
+							lstValidSquares.Add(brdBoardManager.gobSquares[iCheckRowValue, iCheckColumnValue]);
+						}
+					}
+				}
+			}
+
             break;
 		}
 	}
